@@ -1,1 +1,182 @@
-* ‘оздала пустой проект* Ћтрисовала предположительный дизайн приложениЯ, расположение всего функционала приложениЯ (файлы лежат в папке PROJECT в GitHub) * ‘оздала файл, в котором реализован класс CardAdapter* ‘оздала файл, в котором реализован класс TabsAdapter* ‘оздала файл, в котором реализован data class Tab* ‘оздала файл, в котором реализован data class Card* ‘оздала файл, в котором реализован класс AddCardActivity* ‘оздала файл, в котором реализован соответственно с остальными классами класс MainActivity* …сли рассматривать уже проделанную работу с точки зрениЯ функционала, то уже реализован интерфейс страницы (полоса прочтениЯ, карточки на странице, вкладки, кнопки с голосовым прочтением), также возможность добавлЯть карточку из галереи карточек, а в галереи карточек есть возможность уже создать карточку, добавив ее из галереи устройства или с камеры. ’акже уже реализовано окно обработки карточки, с добавлением названиЯ. * Љусок кода на примере класса MainActivity: package com.example.myapplication;import androidx.appcompat.app.AppCompatActivity;import androidx.recyclerview.widget.GridLayoutManager;import androidx.recyclerview.widget.LinearLayoutManager;import androidx.recyclerview.widget.RecyclerView;import android.content.Intent;import android.os.Build;import android.os.Bundle;import android.speech.tts.TextToSpeech;import android.view.View;import android.widget.Toast;import com.example.myapplication.model.Card;import com.example.myapplication.model.ICard;import com.example.myapplication.model.Tab;import com.example.myapplication.model.UserCard;import com.google.android.material.floatingactionbutton.FloatingActionButton;import java.util.ArrayList;import java.util.List;import java.util.Locale;import DataBase.CardEntity;public class MainActivity extends AppCompatActivity {    private RecyclerView cardsRecyclerView;    private CardAdapter cardsAdapter;    private RecyclerView tabsRecyclerView;    private TabsAdapter tabsAdapter;    private RecyclerView cardsSentenceRecyclerView;    private CardAdapter cardsSentenceAdapter;    private FloatingActionButton voiceButton;    private FloatingActionButton eraseButton;    private TextToSpeech TTS;    private boolean ttsEnabled;    @Override    protected void onCreate(Bundle savedInstanceState) {        super.onCreate(savedInstanceState);        setContentView(R.layout.activity_main);        initCardsRecyclerView();        initTabsRecyclerView();        initCardsSentenceRecyclerView();        initButtons();        setCards();        setTabs();        TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {            @Override public void onInit(int initStatus) {                if (initStatus == TextToSpeech.SUCCESS) {                    if (TTS.isLanguageAvailable(new Locale(Locale.getDefault().getLanguage()))                            == TextToSpeech.LANG_AVAILABLE) {                        TTS.setLanguage(new Locale(Locale.getDefault().getLanguage()));                    } else {                        TTS.setLanguage(Locale.US);                    }                    TTS.setPitch(1.3f);                    TTS.setSpeechRate(0.7f);                    ttsEnabled = true;                } else if (initStatus == TextToSpeech.ERROR) {                    Toast.makeText(MainActivity.this, "Ћшибка", Toast.LENGTH_LONG).show();                    ttsEnabled = false;                }            }        });    }    private void initCardsRecyclerView() {        cardsRecyclerView = findViewById(R.id.cards_recycler_view);        cardsAdapter = new CardAdapter();        cardsAdapter.setOnCardCLickListener(new CardAdapter.OnCardCLickListener() {            @Override            public void onClick(ICard card) {                if(card.isPlusNeeded()){                    startActivity(new Intent(MainActivity.this, GalleryActivity.class));                } else{                    cardsSentenceAdapter.addCard(card);                }            }        });        RecyclerView.LayoutManager gridLayoutManager = new GridLayoutManager(this, 4);        cardsRecyclerView.setLayoutManager(gridLayoutManager);        cardsRecyclerView.setAdapter(cardsAdapter);    }    private void setCards(){        List<ICard> cards = new ArrayList<>();        cards.add(new Card(R.drawable.first, "", true));        cards.add(new Card(R.drawable.drink, "пить",false));        cards.add(new Card(R.drawable.stop, "пить",false));        cards.add(new Card(R.drawable.eat, "пить",false));        cards.add(new Card(R.drawable.hello, "пить",false));        cards.add(new Card(R.drawable.play, "пить", false));        cards.add(new Card(R.drawable.undress, "пить",false));        cards.add(new Card(R.drawable.silence, "пить",false));        cards.add(new Card(R.drawable.sleep, "пить",false));        List<CardEntity> cardEntities = App.getInstance().getDatabase().cardDao().getAll();        for (CardEntity cardEntity: cardEntities){            cards.add(new UserCard(cardEntity.imagePath, cardEntity.text, false));        }        cardsAdapter.setCards(cards);    }    private void initTabsRecyclerView() {        tabsRecyclerView = findViewById(R.id.tabs_recycler_view);        tabsAdapter = new TabsAdapter();        tabsAdapter.setOnTabCLickListener(new TabsAdapter.OnTabCLickListener() {            @Override            public void onClick(Tab tab) {                Toast.makeText(MainActivity.this, tab.getName(), Toast.LENGTH_SHORT).show();            }        });        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);        tabsRecyclerView.setLayoutManager(layoutManager);        tabsRecyclerView.setAdapter(tabsAdapter);    }    private void setTabs() {        List<Tab> tabs = new ArrayList<>();        tabs.add(new Tab("…да", 1, false, R.color.lime));        tabs.add(new Tab("†ивотные", 2, false, R.color.red));        tabs.add(new Tab("ђастениЯ", 3, false, R.color.blue));        tabs.add(new Tab("…щЮ что-то", 4, false, R.color.navy));        tabs.add(new Tab("…щЮ что-то", 5, false, R.color.green));        tabs.add(new Tab("…щЮ что-то", 6, false, R.color.red));        tabs.add(new Tab("…щЮ что-то", 7, false, R.color.blue));        tabs.add(new Tab("", -1, true, R.color.white));        tabsAdapter.setTabs(tabs);        tabsAdapter.notifyDataSetChanged();    }    private void initCardsSentenceRecyclerView() {        cardsSentenceRecyclerView = findViewById(R.id.cards_sentence_recycler_view);        cardsSentenceAdapter = new CardAdapter();        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);        cardsSentenceRecyclerView.setLayoutManager(layoutManager);        cardsSentenceRecyclerView.setAdapter(cardsSentenceAdapter);    }    private void initButtons() {        voiceButton = findViewById(R.id.fab_voice);        eraseButton = findViewById(R.id.fab_erase);        voiceButton.setOnClickListener(new View.OnClickListener() {            @Override            public void onClick(View v) {                speak(cardsSentenceAdapter.getSentence());            }        });        eraseButton.setOnClickListener(new View.OnClickListener() {            @Override            public void onClick(View v) {                cardsSentenceAdapter.erase();            }        });    }    private void speak(String text) {        if (!ttsEnabled) return;        String utteranceId = this.hashCode() + "";        TTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);    }}
+* РЎРѕР·РґР°Р»Р° РїСѓСЃС‚РѕР№ РїСЂРѕРµРєС‚
+* РћС‚СЂРёСЃРѕРІР°Р»Р° РїСЂРµРґРїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Р№ РґРёР·Р°Р№РЅ РїСЂРёР»РѕР¶РµРЅРёСЏ, СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ РІСЃРµРіРѕ С„СѓРЅРєС†РёРѕРЅР°Р»Р° РїСЂРёР»РѕР¶РµРЅРёСЏ (С„Р°Р№Р»С‹ Р»РµР¶Р°С‚ РІ РїР°РїРєРµ PROJECT РІ GitHub) 
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ РєР»Р°СЃСЃ CardAdapter
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ РєР»Р°СЃСЃ TabsAdapter
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ data class Tab
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ data class Card
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ РєР»Р°СЃСЃ AddCardActivity
+* РЎРѕР·РґР°Р»Р° С„Р°Р№Р», РІ РєРѕС‚РѕСЂРѕРј СЂРµР°Р»РёР·РѕРІР°РЅ СЃРѕРѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕ СЃ РѕСЃС‚Р°Р»СЊРЅС‹РјРё РєР»Р°СЃСЃР°РјРё РєР»Р°СЃСЃ MainActivity
+* Р•СЃР»Рё СЂР°СЃСЃРјР°С‚СЂРёРІР°С‚СЊ СѓР¶Рµ РїСЂРѕРґРµР»Р°РЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ СЃ С‚РѕС‡РєРё Р·СЂРµРЅРёСЏ С„СѓРЅРєС†РёРѕРЅР°Р»Р°, С‚Рѕ СѓР¶Рµ СЂРµР°Р»РёР·РѕРІР°РЅ РёРЅС‚РµСЂС„РµР№СЃ СЃС‚СЂР°РЅРёС†С‹ (РїРѕР»РѕСЃР° РїСЂРѕС‡С‚РµРЅРёСЏ, РєР°СЂС‚РѕС‡РєРё РЅР° СЃС‚СЂР°РЅРёС†Рµ, РІРєР»Р°РґРєРё, РєРЅРѕРїРєРё СЃ РіРѕР»РѕСЃРѕРІС‹Рј РїСЂРѕС‡С‚РµРЅРёРµРј), С‚Р°РєР¶Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РґРѕР±Р°РІР»СЏС‚СЊ РєР°СЂС‚РѕС‡РєСѓ РёР· РіР°Р»РµСЂРµРё РєР°СЂС‚РѕС‡РµРє, Р° РІ РіР°Р»РµСЂРµРё РєР°СЂС‚РѕС‡РµРє РµСЃС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ СѓР¶Рµ СЃРѕР·РґР°С‚СЊ РєР°СЂС‚РѕС‡РєСѓ, РґРѕР±Р°РІРёРІ РµРµ РёР· РіР°Р»РµСЂРµРё СѓСЃС‚СЂРѕР№СЃС‚РІР° РёР»Рё СЃ РєР°РјРµСЂС‹. РўР°РєР¶Рµ СѓР¶Рµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РѕРєРЅРѕ РѕР±СЂР°Р±РѕС‚РєРё РєР°СЂС‚РѕС‡РєРё, СЃ РґРѕР±Р°РІР»РµРЅРёРµРј РЅР°Р·РІР°РЅРёСЏ. 
+* РљСѓСЃРѕРє РєРѕРґР° РЅР° РїСЂРёРјРµСЂРµ РєР»Р°СЃСЃР° MainActivity: 
+
+package com.example.myapplication;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
+import android.view.View;
+import android.widget.Toast;
+
+import com.example.myapplication.model.Card;
+import com.example.myapplication.model.ICard;
+import com.example.myapplication.model.Tab;
+import com.example.myapplication.model.UserCard;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import DataBase.CardEntity;
+
+public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView cardsRecyclerView;
+    private CardAdapter cardsAdapter;
+    private RecyclerView tabsRecyclerView;
+    private TabsAdapter tabsAdapter;
+    private RecyclerView cardsSentenceRecyclerView;
+    private CardAdapter cardsSentenceAdapter;
+    private FloatingActionButton voiceButton;
+    private FloatingActionButton eraseButton;
+    private TextToSpeech TTS;
+    private boolean ttsEnabled;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initCardsRecyclerView();
+        initTabsRecyclerView();
+        initCardsSentenceRecyclerView();
+        initButtons();
+
+        setCards();
+        setTabs();
+
+        TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override public void onInit(int initStatus) {
+                if (initStatus == TextToSpeech.SUCCESS) {
+                    if (TTS.isLanguageAvailable(new Locale(Locale.getDefault().getLanguage()))
+                            == TextToSpeech.LANG_AVAILABLE) {
+                        TTS.setLanguage(new Locale(Locale.getDefault().getLanguage()));
+                    } else {
+                        TTS.setLanguage(Locale.US);
+                    }
+                    TTS.setPitch(1.3f);
+                    TTS.setSpeechRate(0.7f);
+                    ttsEnabled = true;
+                } else if (initStatus == TextToSpeech.ERROR) {
+                    Toast.makeText(MainActivity.this, "ЕЅГёГЁГЎГЄГ ", Toast.LENGTH_LONG).show();
+                    ttsEnabled = false;
+                }
+            }
+        });
+    }
+
+    private void initCardsRecyclerView() {
+        cardsRecyclerView = findViewById(R.id.cards_recycler_view);
+        cardsAdapter = new CardAdapter();
+        cardsAdapter.setOnCardCLickListener(new CardAdapter.OnCardCLickListener() {
+            @Override
+            public void onClick(ICard card) {
+                if(card.isPlusNeeded()){
+                    startActivity(new Intent(MainActivity.this, GalleryActivity.class));
+                } else{
+                    cardsSentenceAdapter.addCard(card);
+                }
+            }
+        });
+        RecyclerView.LayoutManager gridLayoutManager = new GridLayoutManager(this, 4);
+
+        cardsRecyclerView.setLayoutManager(gridLayoutManager);
+        cardsRecyclerView.setAdapter(cardsAdapter);
+    }
+
+    private void setCards(){
+        List<ICard> cards = new ArrayList<>();
+        cards.add(new Card(R.drawable.first, "", true));
+        cards.add(new Card(R.drawable.drink, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.stop, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.eat, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.hello, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.play, "ГЇГЁГІГј", false));
+        cards.add(new Card(R.drawable.undress, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.silence, "ГЇГЁГІГј",false));
+        cards.add(new Card(R.drawable.sleep, "ГЇГЁГІГј",false));
+
+        List<CardEntity> cardEntities = App.getInstance().getDatabase().cardDao().getAll();
+        for (CardEntity cardEntity: cardEntities){
+            cards.add(new UserCard(cardEntity.imagePath, cardEntity.text, false));
+        }
+        cardsAdapter.setCards(cards);
+    }
+
+    private void initTabsRecyclerView() {
+        tabsRecyclerView = findViewById(R.id.tabs_recycler_view);
+        tabsAdapter = new TabsAdapter();
+        tabsAdapter.setOnTabCLickListener(new TabsAdapter.OnTabCLickListener() {
+            @Override
+            public void onClick(Tab tab) {
+                Toast.makeText(MainActivity.this, tab.getName(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        tabsRecyclerView.setLayoutManager(layoutManager);
+        tabsRecyclerView.setAdapter(tabsAdapter);
+    }
+
+    private void setTabs() {
+        List<Tab> tabs = new ArrayList<>();
+        tabs.add(new Tab("вЂ¦Г¤Г ", 1, false, R.color.lime));
+        tabs.add(new Tab("вЂ ГЁГўГ®ГІГ­Г»ГҐ", 2, false, R.color.red));
+        tabs.add(new Tab("ВђГ Г±ГІГҐГ­ГЁГџ", 3, false, R.color.blue));
+        tabs.add(new Tab("вЂ¦Г№Гћ Г·ГІГ®-ГІГ®", 4, false, R.color.navy));
+        tabs.add(new Tab("вЂ¦Г№Гћ Г·ГІГ®-ГІГ®", 5, false, R.color.green));
+        tabs.add(new Tab("вЂ¦Г№Гћ Г·ГІГ®-ГІГ®", 6, false, R.color.red));
+        tabs.add(new Tab("вЂ¦Г№Гћ Г·ГІГ®-ГІГ®", 7, false, R.color.blue));
+        tabs.add(new Tab("", -1, true, R.color.white));
+        tabsAdapter.setTabs(tabs);
+        tabsAdapter.notifyDataSetChanged();
+    }
+
+    private void initCardsSentenceRecyclerView() {
+        cardsSentenceRecyclerView = findViewById(R.id.cards_sentence_recycler_view);
+        cardsSentenceAdapter = new CardAdapter();
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+
+        cardsSentenceRecyclerView.setLayoutManager(layoutManager);
+        cardsSentenceRecyclerView.setAdapter(cardsSentenceAdapter);
+    }
+
+    private void initButtons() {
+        voiceButton = findViewById(R.id.fab_voice);
+        eraseButton = findViewById(R.id.fab_erase);
+        voiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                speak(cardsSentenceAdapter.getSentence());
+            }
+        });
+        eraseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cardsSentenceAdapter.erase();
+            }
+        });
+    }
+
+    private void speak(String text) {
+        if (!ttsEnabled) return;
+        String utteranceId = this.hashCode() + "";
+        TTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+    }
+
+}
+
+

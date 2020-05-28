@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                     TTS.setSpeechRate(0.7f);
                     ttsEnabled = true;
                 } else if (initStatus == TextToSpeech.ERROR) {
-                    Toast.makeText(MainActivity.this, "Žøèáêà", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Ошибка", Toast.LENGTH_LONG).show();
                     ttsEnabled = false;
                 }
             }
@@ -101,14 +101,14 @@ public class MainActivity extends AppCompatActivity {
     private void setCards(){
         List<ICard> cards = new ArrayList<>();
         cards.add(new Card(R.drawable.first, "", true));
-        cards.add(new Card(R.drawable.drink, "ïèòü",false));
-        cards.add(new Card(R.drawable.stop, "ïèòü",false));
-        cards.add(new Card(R.drawable.eat, "ïèòü",false));
-        cards.add(new Card(R.drawable.hello, "ïèòü",false));
-        cards.add(new Card(R.drawable.play, "ïèòü", false));
-        cards.add(new Card(R.drawable.undress, "ïèòü",false));
-        cards.add(new Card(R.drawable.silence, "ïèòü",false));
-        cards.add(new Card(R.drawable.sleep, "ïèòü",false));
+        cards.add(new Card(R.drawable.drink, "пить",false));
+        cards.add(new Card(R.drawable.stop, "пить",false));
+        cards.add(new Card(R.drawable.eat, "пить",false));
+        cards.add(new Card(R.drawable.hello, "пить",false));
+        cards.add(new Card(R.drawable.play, "пить", false));
+        cards.add(new Card(R.drawable.undress, "пить",false));
+        cards.add(new Card(R.drawable.silence, "пить",false));
+        cards.add(new Card(R.drawable.sleep, "пить",false));
 
         List<CardEntity> cardEntities = App.getInstance().getDatabase().cardDao().getAll();
         for (CardEntity cardEntity: cardEntities){
@@ -133,13 +133,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setTabs() {
         List<Tab> tabs = new ArrayList<>();
-        tabs.add(new Tab("…äà", 1, false, R.color.lime));
-        tabs.add(new Tab("†èâîòíûå", 2, false, R.color.red));
-        tabs.add(new Tab("àñòåíèß", 3, false, R.color.blue));
-        tabs.add(new Tab("…ùÞ ÷òî-òî", 4, false, R.color.navy));
-        tabs.add(new Tab("…ùÞ ÷òî-òî", 5, false, R.color.green));
-        tabs.add(new Tab("…ùÞ ÷òî-òî", 6, false, R.color.red));
-        tabs.add(new Tab("…ùÞ ÷òî-òî", 7, false, R.color.blue));
+        tabs.add(new Tab("Еда", 1, false, R.color.lime));
+        tabs.add(new Tab("Животные", 2, false, R.color.red));
+        tabs.add(new Tab("Растения", 3, false, R.color.blue));
+        tabs.add(new Tab("Ещё что-то", 4, false, R.color.navy));
+        tabs.add(new Tab("Ещё что-то", 5, false, R.color.green));
+        tabs.add(new Tab("Ещё что-то", 6, false, R.color.red));
+        tabs.add(new Tab("Ещё что-то", 7, false, R.color.blue));
         tabs.add(new Tab("", -1, true, R.color.white));
         tabsAdapter.setTabs(tabs);
         tabsAdapter.notifyDataSetChanged();
@@ -178,5 +178,3 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-
-

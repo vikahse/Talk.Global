@@ -1,4 +1,4 @@
-Ссылка на YouTube: 
+Ссылка на YouTube: https://youtu.be/mOqR-TbtF9o
 
 Список реализованных сценариев:
 
